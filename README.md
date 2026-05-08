@@ -79,7 +79,7 @@ NEXT_PUBLIC_BACKEND_URL=http://localhost:8000
 ## Build Progress
 
 - [x] Phase 1 — Backend Foundation (Steps 1–5)
-- [ ] Phase 1 — Backend Foundation (Steps 6–9)
+- [x] Phase 1 — Backend Foundation (Steps 6–9)
 - [ ] Phase 2 — Frontend Foundation
 - [ ] Phase 3 — Core Features
 - [ ] Phase 4 — Chat + AI Coach

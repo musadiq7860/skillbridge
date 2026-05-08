@@ -180,10 +180,10 @@ GROQ_API_KEY=
 | 3 | `backend/services/matcher.py` | ✅ Done |
 | 4 | `backend/services/ai_coach.py` | ✅ Done |
 | 5 | `backend/routes/skills.py` | ✅ Done |
-| 6 | `backend/routes/matches.py` | ⬜ Not started |
-| 7 | `backend/routes/chat.py` | ⬜ Not started |
-| 8 | `backend/main.py` | ⬜ Not started |
-| 9 | `backend/Dockerfile` | ⬜ Not started |
+| 6 | `backend/routes/matches.py` | ✅ Done |
+| 7 | `backend/routes/chat.py` | ✅ Done |
+| 8 | `backend/main.py` | ✅ Done |
+| 9 | `backend/Dockerfile` | ✅ Done |
 
 ### Phase 2 — Frontend Foundation
 | Step | File | Status |
