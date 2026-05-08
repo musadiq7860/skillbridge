@@ -119,6 +119,18 @@ dist
 # Firebase cache directory
 .firebase/
 
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+*.egg-info/
+
+# HuggingFace / sentence-transformers model cache
+backend/.cache/
+
+
 # TernJS port file
 .tern-port
 
