@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { api } from "@/lib/api";
+import { useState, useMemo } from "react";
+import { createClient } from "@/lib/supabase";
 import {
   Sparkles,
   BookOpen,
@@ -23,9 +23,9 @@ export default function SkillForm({ type, userId, onSuccess }: SkillFormProps) {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const supabase = useMemo(() => createClient(), []);
   const isOffer = type === "offer";
   const Icon = isOffer ? Sparkles : BookOpen;
-  const accentColor = isOffer ? "teal" : "amber";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,17 +34,25 @@ export default function SkillForm({ type, userId, onSuccess }: SkillFormProps) {
     setSuccess(false);
 
     try {
-      if (isOffer) {
-        await api.offerSkill({ user_id: userId, title, description });
-      } else {
-        await api.needSkill({ user_id: userId, title, description });
+      const table = isOffer ? "skills_offered" : "skills_needed";
+
+      const { error: insertError } = await supabase
+        .from(table)
+        .insert({
+          user_id: userId,
+          title: title.trim(),
+          description: description.trim(),
+        });
+
+      if (insertError) {
+        throw new Error(insertError.message);
       }
+
       setSuccess(true);
       setTitle("");
       setDescription("");
       onSuccess?.();
 
-      // Clear success message after 3 seconds
       setTimeout(() => setSuccess(false), 3000);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Something went wrong");
@@ -80,7 +88,7 @@ export default function SkillForm({ type, userId, onSuccess }: SkillFormProps) {
 
       {/* Feedback */}
       {success && (
-        <div className="flex items-center gap-2 p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-sm animate-in fade-in slide-in-from-top-1">
+        <div className="flex items-center gap-2 p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-sm">
           <CheckCircle2 className="h-4 w-4 shrink-0" />
           <span>
             {isOffer
