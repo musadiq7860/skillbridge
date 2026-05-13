@@ -4,6 +4,7 @@ const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000';
 
 // Types
 export interface SkillRequest {
+  user_id: string;
   title: string;
   description: string;
 }

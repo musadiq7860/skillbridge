@@ -35,9 +35,9 @@ export default function SkillForm({ type, userId, onSuccess }: SkillFormProps) {
 
     try {
       if (isOffer) {
-        await api.offerSkill({ title, description });
+        await api.offerSkill({ user_id: userId, title, description });
       } else {
-        await api.needSkill({ title, description });
+        await api.needSkill({ user_id: userId, title, description });
       }
       setSuccess(true);
       setTitle("");
