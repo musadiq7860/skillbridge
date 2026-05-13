@@ -96,12 +96,20 @@ export default function DashboardPage() {
 
       const { data: m } = await supabase
         .from("matches")
-        .select("*")
+        .select("*, chat_sessions(id)")
         .or(`teacher_id.eq.${user.id},learner_id.eq.${user.id}`)
         .neq("status", "rejected")
         .order("created_at", { ascending: false })
         .limit(10);
-      if (m) setMatches(m as MatchRow[]);
+      
+      if (m) {
+        // Map the related chat_session id into the match object
+        const mappedMatches = m.map((match: any) => ({
+          ...match,
+          chat_session_id: match.chat_sessions?.[0]?.id || null,
+        }));
+        setMatches(mappedMatches as MatchRow[]);
+      }
 
       setLoading(false);
     };
@@ -113,6 +121,66 @@ export default function DashboardPage() {
       s.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       s.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const handleRequestSkill = async (skillId: string) => {
+    if (!profile) return;
+    const skill = feedSkills.find((s) => s.id === skillId);
+    if (!skill) return;
+
+    try {
+      setLoading(true);
+      // 1. Check if match already exists
+      const { data: existingMatch } = await supabase
+        .from("matches")
+        .select("id, chat_sessions(id)")
+        .eq("learner_id", profile.id)
+        .eq("skill_offered_id", skillId)
+        .maybeSingle();
+
+      if (existingMatch) {
+        const chatId = existingMatch.chat_sessions?.[0]?.id;
+        if (chatId) {
+          router.push(`/chat/${chatId}`);
+        } else {
+          router.push(`/dashboard`);
+        }
+        return;
+      }
+
+      // 2. Insert match
+      const { data: match, error: matchError } = await supabase
+        .from("matches")
+        .insert({
+          teacher_id: skill.user_id,
+          learner_id: profile.id,
+          skill_offered_id: skillId,
+          score: 1.0, // Manual request
+          status: "pending",
+        })
+        .select()
+        .single();
+
+      if (matchError) throw matchError;
+
+      // 3. Create chat session
+      const { data: chatSession, error: chatError } = await supabase
+        .from("chat_sessions")
+        .insert({
+          match_id: match.id,
+        })
+        .select()
+        .single();
+
+      if (chatError) throw chatError;
+
+      // 4. Redirect to chat
+      router.push(`/chat/${chatSession.id}`);
+    } catch (err) {
+      console.error("Error requesting skill:", err);
+      alert("Failed to request skill. Please try again.");
+      setLoading(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -232,7 +300,7 @@ export default function DashboardPage() {
                 userName={skill.profiles?.name || "Anonymous"}
                 userAvatar={skill.profiles?.avatar_url}
                 userLocation={skill.profiles?.location}
-                onRequest={(skillId) => console.log("Request skill:", skillId)}
+                onRequest={handleRequestSkill}
               />
             ))}
           </div>
