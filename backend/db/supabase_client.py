@@ -1,12 +1,13 @@
 import os
-from supabase import create_client, Client
 from dotenv import load_dotenv
 
 load_dotenv()
 
-# Hugging Face Spaces inject proxy env vars which break older supabase-py clients
+# Pop HF Spaces proxy env vars BEFORE importing supabase/httpx
 for key in ["HTTP_PROXY", "HTTPS_PROXY", "http_proxy", "https_proxy"]:
     os.environ.pop(key, None)
+
+from supabase import create_client, Client
 
 SUPABASE_URL: str = os.environ["SUPABASE_URL"]
 SUPABASE_SERVICE_KEY: str = os.environ["SUPABASE_SERVICE_KEY"]

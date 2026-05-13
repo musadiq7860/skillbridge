@@ -1,4 +1,10 @@
 import logging
+import os
+
+# Pop HF Spaces proxy env vars BEFORE any other imports to prevent supabase/httpx from breaking
+for key in ["HTTP_PROXY", "HTTPS_PROXY", "http_proxy", "https_proxy"]:
+    os.environ.pop(key, None)
+
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
