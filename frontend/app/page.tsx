@@ -93,7 +93,7 @@ export default function HomePage() {
       {/* Footer */}
       <footer className="border-t border-slate-800 py-8">
         <div className="container mx-auto px-4 text-center text-sm text-slate-500">
-          © {new Date().getFullYear()} SkillBridge. Built with AI.
+          © {new Date().getFullYear()} SkillBridge. All rights reserved.
         </div>
       </footer>
     </div>
