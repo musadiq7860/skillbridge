@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { createClient } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 import SkillForm from "@/components/SkillForm";
@@ -35,7 +35,6 @@ export default function ProfilePage() {
   const [neededSkills, setNeededSkills] = useState<Skill[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Profile edit state
   const [editName, setEditName] = useState("");
   const [editLocation, setEditLocation] = useState("");
   const [saving, setSaving] = useState(false);
@@ -43,7 +42,7 @@ export default function ProfilePage() {
 
   const [activeTab, setActiveTab] = useState<"offer" | "need">("offer");
 
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
   const router = useRouter();
 
   useEffect(() => {
@@ -57,7 +56,6 @@ export default function ProfilePage() {
         return;
       }
 
-      // Fetch profile
       const { data: profileData } = await supabase
         .from("profiles")
         .select("*")
@@ -68,24 +66,31 @@ export default function ProfilePage() {
         setProfile(profileData);
         setEditName(profileData.name || "");
         setEditLocation(profileData.location || "");
+      } else {
+        // Profile doesn't exist yet, create it
+        const { data: newProfile } = await supabase
+          .from("profiles")
+          .upsert({ id: user.id, name: user.user_metadata?.name || "" })
+          .select()
+          .single();
+        if (newProfile) {
+          setProfile(newProfile);
+          setEditName(newProfile.name || "");
+        }
       }
 
-      // Fetch offered skills
       const { data: offered } = await supabase
         .from("skills_offered")
         .select("id, title, description, created_at")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false });
-
       if (offered) setOfferedSkills(offered);
 
-      // Fetch needed skills
       const { data: needed } = await supabase
         .from("skills_needed")
         .select("id, title, description, created_at")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false });
-
       if (needed) setNeededSkills(needed);
 
       setLoading(false);
@@ -99,10 +104,16 @@ export default function ProfilePage() {
     setSaving(true);
     setSaved(false);
 
-    await supabase
+    const { error } = await supabase
       .from("profiles")
       .update({ name: editName, location: editLocation })
       .eq("id", profile.id);
+
+    if (error) {
+      console.error("Save error:", error);
+      setSaving(false);
+      return;
+    }
 
     setProfile({ ...profile, name: editName, location: editLocation });
     setSaving(false);
@@ -110,7 +121,7 @@ export default function ProfilePage() {
     setTimeout(() => setSaved(false), 3000);
   };
 
-  const refreshSkills = async () => {
+  const refreshSkills = useCallback(async () => {
     if (!profile) return;
     const { data: offered } = await supabase
       .from("skills_offered")
@@ -125,7 +136,7 @@ export default function ProfilePage() {
       .eq("user_id", profile.id)
       .order("created_at", { ascending: false });
     if (needed) setNeededSkills(needed);
-  };
+  }, [profile, supabase]);
 
   if (loading) {
     return (
@@ -137,10 +148,9 @@ export default function ProfilePage() {
 
   return (
     <div className="container mx-auto max-w-5xl px-4 py-8 space-y-8">
-      {/* ── Profile Card ────────────────────────────────────── */}
+      {/* Profile Card */}
       <section className="rounded-2xl glass p-6 md:p-8">
         <div className="flex flex-col sm:flex-row items-start gap-6">
-          {/* Avatar */}
           <div className="relative group">
             <div className="h-24 w-24 rounded-2xl bg-slate-800 border-2 border-slate-700 flex items-center justify-center overflow-hidden">
               {profile?.avatar_url ? (
@@ -158,14 +168,10 @@ export default function ProfilePage() {
             </button>
           </div>
 
-          {/* Editable info */}
           <div className="flex-1 space-y-4 w-full">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label
-                  htmlFor="profile-name"
-                  className="block text-sm font-medium text-slate-400 mb-1"
-                >
+                <label htmlFor="profile-name" className="block text-sm font-medium text-slate-400 mb-1">
                   Full Name
                 </label>
                 <input
@@ -177,10 +183,7 @@ export default function ProfilePage() {
                 />
               </div>
               <div>
-                <label
-                  htmlFor="profile-location"
-                  className="block text-sm font-medium text-slate-400 mb-1"
-                >
+                <label htmlFor="profile-location" className="block text-sm font-medium text-slate-400 mb-1">
                   <MapPin className="inline h-3.5 w-3.5 mr-1" />
                   Location
                 </label>
@@ -212,9 +215,8 @@ export default function ProfilePage() {
         </div>
       </section>
 
-      {/* ── Skill Forms ─────────────────────────────────────── */}
+      {/* Skill Forms */}
       <section className="rounded-2xl glass p-6 md:p-8">
-        {/* Tabs */}
         <div className="flex border-b border-slate-700/50 mb-6">
           <button
             onClick={() => setActiveTab("offer")}
@@ -250,9 +252,8 @@ export default function ProfilePage() {
         )}
       </section>
 
-      {/* ── My Skills Grid ──────────────────────────────────── */}
+      {/* My Skills Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Offered */}
         <section className="rounded-2xl glass p-6">
           <h2 className="flex items-center gap-2 text-lg font-semibold text-white mb-4">
             <Sparkles className="h-5 w-5 text-teal-400" />
@@ -268,23 +269,15 @@ export default function ProfilePage() {
           ) : (
             <div className="space-y-3">
               {offeredSkills.map((skill) => (
-                <div
-                  key={skill.id}
-                  className="p-3.5 rounded-xl bg-slate-800/50 border border-slate-700/50 hover:border-teal-500/30 transition-colors"
-                >
-                  <h4 className="text-sm font-medium text-white">
-                    {skill.title}
-                  </h4>
-                  <p className="text-xs text-slate-400 mt-1 line-clamp-2">
-                    {skill.description}
-                  </p>
+                <div key={skill.id} className="p-3.5 rounded-xl bg-slate-800/50 border border-slate-700/50 hover:border-teal-500/30 transition-colors">
+                  <h4 className="text-sm font-medium text-white">{skill.title}</h4>
+                  <p className="text-xs text-slate-400 mt-1 line-clamp-2">{skill.description}</p>
                 </div>
               ))}
             </div>
           )}
         </section>
 
-        {/* Needed */}
         <section className="rounded-2xl glass p-6">
           <h2 className="flex items-center gap-2 text-lg font-semibold text-white mb-4">
             <BookOpen className="h-5 w-5 text-amber-400" />
@@ -300,16 +293,9 @@ export default function ProfilePage() {
           ) : (
             <div className="space-y-3">
               {neededSkills.map((skill) => (
-                <div
-                  key={skill.id}
-                  className="p-3.5 rounded-xl bg-slate-800/50 border border-slate-700/50 hover:border-amber-500/30 transition-colors"
-                >
-                  <h4 className="text-sm font-medium text-white">
-                    {skill.title}
-                  </h4>
-                  <p className="text-xs text-slate-400 mt-1 line-clamp-2">
-                    {skill.description}
-                  </p>
+                <div key={skill.id} className="p-3.5 rounded-xl bg-slate-800/50 border border-slate-700/50 hover:border-amber-500/30 transition-colors">
+                  <h4 className="text-sm font-medium text-white">{skill.title}</h4>
+                  <p className="text-xs text-slate-400 mt-1 line-clamp-2">{skill.description}</p>
                 </div>
               ))}
             </div>

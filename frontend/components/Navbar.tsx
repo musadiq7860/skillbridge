@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { createClient } from "@/lib/supabase";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
@@ -17,7 +17,7 @@ import type { User as SupabaseUser } from "@supabase/supabase-js";
 export default function Navbar() {
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
   const router = useRouter();
   const pathname = usePathname();
 
