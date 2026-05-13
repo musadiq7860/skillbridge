@@ -41,23 +41,24 @@ async def post_skill_offer(payload: SkillOfferRequest) -> SkillResponse:
     embedding: list[float] = encode_text(payload.title, payload.description)
     client = get_supabase_client()
 
-    result = (
-        client.table("skills_offered")
-        .insert(
-            {
-                "user_id": payload.user_id,
-                "title": payload.title,
-                "description": payload.description,
-                "embedding": embedding,
-            }
+    try:
+        result = (
+            client.table("skills_offered")
+            .insert(
+                {
+                    "user_id": payload.user_id,
+                    "title": payload.title,
+                    "description": payload.description,
+                    "embedding": embedding,
+                }
+            )
+            .execute()
         )
-        .execute()
-    )
-
-    if not result.data:
-        raise HTTPException(status_code=500, detail="Failed to store skill offer")
-
-    row: dict = result.data[0]
+        if not result.data:
+            raise HTTPException(status_code=500, detail="Failed to store skill offer: No data returned")
+        row: dict = result.data[0]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Backend Error: {str(e)}")
     return SkillResponse(
         id=row["id"],
         user_id=row["user_id"],
@@ -78,23 +79,24 @@ async def post_skill_need(payload: SkillNeedRequest) -> SkillResponse:
     embedding: list[float] = encode_text(payload.title, payload.description)
     client = get_supabase_client()
 
-    result = (
-        client.table("skills_needed")
-        .insert(
-            {
-                "user_id": payload.user_id,
-                "title": payload.title,
-                "description": payload.description,
-                "embedding": embedding,
-            }
+    try:
+        result = (
+            client.table("skills_needed")
+            .insert(
+                {
+                    "user_id": payload.user_id,
+                    "title": payload.title,
+                    "description": payload.description,
+                    "embedding": embedding,
+                }
+            )
+            .execute()
         )
-        .execute()
-    )
-
-    if not result.data:
-        raise HTTPException(status_code=500, detail="Failed to store skill need")
-
-    row: dict = result.data[0]
+        if not result.data:
+            raise HTTPException(status_code=500, detail="Failed to store skill need: No data returned")
+        row: dict = result.data[0]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Backend Error: {str(e)}")
 
     # ── ML matching loop ─────────────────────────────────────────────────────
     matches: list[dict] = await find_matches(
