@@ -27,7 +27,6 @@ skillbridge/
 │   ├── routes/
 │   ├── services/
 │   └── db/
-└── IMPLEMENTATION_PLAN.md
 ```
 
 ## How It Works
@@ -76,14 +75,4 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=
 NEXT_PUBLIC_BACKEND_URL=http://localhost:8000
 ```
 
-## Build Progress
 
-- [x] Phase 1 — Backend Foundation (Steps 1–5)
-- [x] Phase 1 — Backend Foundation (Steps 6–9)
-- [ ] Phase 2 — Frontend Foundation
-- [ ] Phase 3 — Core Features
-- [ ] Phase 4 — Chat + AI Coach
-- [ ] Phase 5 — Deployment
-- [ ] Phase 6 — n8n Automation
-
-See [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) for the full detailed plan.
