@@ -14,17 +14,17 @@ import {
 } from "lucide-react";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
 
-export default function Navbar() {
-  const [user, setUser] = useState<SupabaseUser | null>(null);
+export default function Navbar({ initialUser }: { initialUser: SupabaseUser | null }) {
+  const [user, setUser] = useState<SupabaseUser | null>(initialUser);
   const [mobileOpen, setMobileOpen] = useState(false);
   const supabase = useMemo(() => createClient(), []);
   const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => setUser(data.user));
-
+    // We already have initialUser, but we listen for auth changes
     const {
+
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
@@ -81,19 +81,23 @@ export default function Navbar() {
             </>
           ) : (
             <>
-              <Link
-                href="/login"
-                className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition-colors"
-              >
-                <LogIn className="h-4 w-4" />
-                Sign In
-              </Link>
-              <Link
-                href="/register"
-                className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-teal-500 hover:bg-teal-600 text-slate-900 transition-colors"
-              >
-                Get Started
-              </Link>
+              {pathname !== "/login" && (
+                <Link
+                  href="/login"
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition-colors"
+                >
+                  <LogIn className="h-4 w-4" />
+                  Sign In
+                </Link>
+              )}
+              {pathname !== "/register" && (
+                <Link
+                  href="/register"
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-teal-500 hover:bg-teal-600 text-slate-900 transition-colors"
+                >
+                  Get Started
+                </Link>
+              )}
             </>
           )}
         </nav>
@@ -127,21 +131,25 @@ export default function Navbar() {
             </>
           ) : (
             <>
-              <Link
-                href="/login"
-                onClick={() => setMobileOpen(false)}
-                className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition-colors"
-              >
-                <LogIn className="h-4 w-4" />
-                Sign In
-              </Link>
-              <Link
-                href="/register"
-                onClick={() => setMobileOpen(false)}
-                className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium bg-teal-500 hover:bg-teal-600 text-slate-900 transition-colors"
-              >
-                Get Started
-              </Link>
+              {pathname !== "/login" && (
+                <Link
+                  href="/login"
+                  onClick={() => setMobileOpen(false)}
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition-colors"
+                >
+                  <LogIn className="h-4 w-4" />
+                  Sign In
+                </Link>
+              )}
+              {pathname !== "/register" && (
+                <Link
+                  href="/register"
+                  onClick={() => setMobileOpen(false)}
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium bg-teal-500 hover:bg-teal-600 text-slate-900 transition-colors"
+                >
+                  Get Started
+                </Link>
+              )}
             </>
           )}
         </div>
