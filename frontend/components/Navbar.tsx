@@ -61,7 +61,7 @@ export default function Navbar() {
     <header className="sticky top-0 z-50 w-full border-b border-slate-800 bg-slate-950/80 backdrop-blur-xl supports-[backdrop-filter]:bg-slate-950/60">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         {/* Logo */}
-        <Link href={user ? "/dashboard" : "/"} className="flex items-center gap-1 font-bold text-xl tracking-tight text-white">
+        <Link href="/" className="flex items-center gap-1 font-bold text-xl tracking-tight text-white">
           <span className="text-teal-400">Skill</span>Bridge
         </Link>
 
