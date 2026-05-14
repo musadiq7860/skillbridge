@@ -1,6 +1,10 @@
 import Link from "next/link";
+import { createServerSupabaseClient } from '@/lib/supabase-server';
 
-export default function HomePage() {
+export default async function HomePage() {
+  const supabase = await createServerSupabaseClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
   return (
     <div className="flex flex-col">
       {/* Hero */}
@@ -32,18 +36,29 @@ export default function HomePage() {
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link
-              href="/register"
-              className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-teal-500 hover:bg-teal-600 text-slate-900 font-semibold text-base shadow-lg shadow-teal-500/20 hover:shadow-teal-500/30 transition-all"
-            >
-              Get Started — It&apos;s Free
-            </Link>
-            <Link
-              href="/login"
-              className="w-full sm:w-auto px-8 py-3.5 rounded-xl border border-slate-700 hover:border-slate-600 text-slate-300 hover:text-white font-medium text-base transition-all"
-            >
-              Sign In
-            </Link>
+            {user ? (
+              <Link
+                href="/dashboard"
+                className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-teal-500 hover:bg-teal-600 text-slate-900 font-semibold text-base shadow-lg shadow-teal-500/20 hover:shadow-teal-500/30 transition-all"
+              >
+                Go to Dashboard
+              </Link>
+            ) : (
+              <>
+                <Link
+                  href="/register"
+                  className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-teal-500 hover:bg-teal-600 text-slate-900 font-semibold text-base shadow-lg shadow-teal-500/20 hover:shadow-teal-500/30 transition-all"
+                >
+                  Get Started — It&apos;s Free
+                </Link>
+                <Link
+                  href="/login"
+                  className="w-full sm:w-auto px-8 py-3.5 rounded-xl border border-slate-700 hover:border-slate-600 text-slate-300 hover:text-white font-medium text-base transition-all"
+                >
+                  Sign In
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </section>
