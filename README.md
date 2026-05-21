@@ -1,7 +1,7 @@
-;;.;.;;.;.# SkillBridge
+njnjnj;;.;.;;.;.# SkillBridge
 
 🌐 **Live Demo:** [https://skillbridge9.vercel.app/](https://skillbridge9.vercel.app/)
-
+ n n n n n n n n n n n n n 
 A full-stack community web app where users post skills they can teach or want to learn. An ML embedding model matches teachers with learners in real-time using semantic similarity (pgvector cosine search). When matched, both users enter a live chat room where an AI Coach (Groq LLaMA 3.3 70B) observes and jumps in every 4th message to clarify, give examples, or suggest free resources.
 
 ## Tech Stack
